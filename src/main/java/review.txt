@@ -1,0 +1,32 @@
+Why did our insert not work when we were using autocommit = false?
+because, SQL is managing our transactions without us knowing otherwise -
+why would we want control over transactions?
+ACID
+let's say that you were writing a large amount of data into DB - a lot of food types and groceries
+and your application completely crashes halfway through
+if you're committing every single value as they come in, then you'd have no way of knowing
+how much of your data is actually correct
+The property for allowing all-or-nothing transactions is called
+
+ACID is a set of requirements for proper transaction control
+Atomicity - a transaction can not be divided
+Consistency - all transactions are fully completed
+Isolation - transactions can not modify other transactions
+Durability - the database is resistant to catastrophic failures by maintaining backups
+
+this is ultimately a huge benefit to sql, because when we're dealing with huge amounts of data,
+it becomes impossible to verify if that data is actually correct
+
+as a review...
+jdbc allows us to integrate sql with java (java database connectivity)
+what parts of jdbc allows us to use sql statements in java?
+Connection objects, Statement objects, PreparedStatement objects, ResultSets, DriverManager
+Statements vs PreparedStatements?
+preparedStatements prevent sql injection
+What is the factory design pattern?
+Class that can not be instantiated whose job it is to create a certain type(s) of object
+Singleton - class that can not be instantiated whose job it is to distribute a single instance of an object
+What's a DAO?
+Data Access Objects - design pattern that mediates connections to database
+
+
