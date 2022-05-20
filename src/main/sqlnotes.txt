@@ -1,0 +1,174 @@
+SELECT * FROM FoodType inner join Grocery on FoodTypeID = FoodType;
+
+insert into FoodType (FoodTypeName, CanEat)
+VALUES
+('Bread', 0),
+('Dairy', 1),
+('Fish', 1),
+('Vegetable', 1);
+
+insert into Grocery (GroceryID, GroceryName)
+VALUES
+(4, 'Jam');
+
+insert into Supermarket
+(SupermarketID, SupermarketName)
+VALUES (1, 'Aldi'),
+(2, 'Whole Foods'),
+(3, 'Publix');
+
+Select * from Supermarket ;
+
+SELECT * FROM FoodType left outer join Grocery on FoodTypeID = FoodType;
+SELECT * FROM FoodType right outer join Grocery on FoodTypeID = FoodType;
+SELECT * FROM FoodType full outer join Grocery on FoodTypeID = FoodType;
+
+/*
+an outer join joins rows even when there is no match (one half is null)
+what do you all think this may be useful for?
+it's useful for finding rows where there are no keys pointing to this table:
+for instance, finding food types that have no foods stocked
+
+outer joins can also be specified to left/right
+*/
+
+SELECT * FROM Grocery cross join Supermarket;
+
+/*
+ * a cross join joins every possible combination on rows from the two tables
+ * so, in this example, we get every possible grocery every possible supermarket can sell
+ * this is useful because, let's say, we want to find every grocery that every supermarket is *not selling*
+ * in this case, we take this join and subtract from the availability table
+ */
+
+
+SELECT * FROM Grocery cross join Supermarket;
+
+insert into Availability (GroceryID, SupermarketID)
+VALUES
+(1, 1),
+(1, 3),
+(2, 2),
+(3, 1),
+(3, 2),
+(3, 3),
+(4, 2);
+
+SELECT GroceryID, SupermarketID from Grocery cross join Supermarket
+except
+SELECT GroceryID, SupermarketID from Availability;
+
+/*
+ * except
+ * intersect
+ * union
+ * union all
+ */
+
+select * from Availability;
+Update Availability set price=.99 where GroceryID = 1;
+Update Availability set price= 2.99 where GroceryID = 2;
+Update Availability set price=3.99 where GroceryID = 3;
+Update Availability set price=1.99 where GroceryID = 4;
+update Availability set price=.49 where SupermarketID =1;
+
+select avg(price) from Availability;
+select avg(price) from Availability group by GroceryID;
+
+select * from grocery inner join (select GroceryID, avg(price) as avg from Availability group by GroceryID) x on Grocery.GroceryID = x.GroceryID;
+--select everything from grocery combined with the average price for each grocery across supermarkets
+--we needed to define our columns (eg avg(price) needed a name), we needed group by to group the groceries together, we need to define an alias
+--(x) for nested queries, and we needed to define the condition on which we join the tables
+
+--how many stores are a grocery available at
+select count(*) from Availability group by GroceryID;
+--how many items are available per supermarket
+select count(*) from Availability group by SupermarketID;
+
+
+--the 3 most common groceries across supermarkets
+select top 3 count(*) from Availability group by GroceryID order by count(*) desc;
+
+--the minimum price for each grocery (between different supermarkets)
+
+--we need to match the minimum price back with the supermarket that has that same price if we want to find which supermarket has the cheapest grocery
+select SupermarketID, Availability.GroceryID, minprice from
+Availability right join
+(select GroceryID, min(price) as minprice from Availability group by GroceryID) as x
+on Availability.price = minprice;
+select * from Availability;
+
+/*
+group by - groups by like values in a column
+aggregates - min, max, count, avg
+more joins - outer vs inner, left vs right vs full,
+cross join, self join, equi/theta joins just means that we're joining on specific conditions
+set operations (except, union, union all, intersect)
+alias (sometime we need this with nested queries, sometimes we need to rename columns as well (aggregates))
+
+views - saving a query (the values will change as the rows change)
+materialized view - snapshot of a query at a given time (does not change)
+
+index - a registry of the ordering of values
+by default, we have a clustered index (the physical storing of items on disk, by default, primary key is used)
+clustered index is kind of like table of contents - whereas a normal index is like having a glossary at the end of a book that tells you
+what pages certain topics were mentioned (even though it doesn't go in a particular order, it can still speed up queries)
+
+sublanguages
+	DDL - data definition language - create, alter
+	DML - data modification language - insert, update, truncate
+	DQL - data query language - select
+	DCL - Data control language( permissions)
+	TCL - transaction control (commits)'
+
+normalization?
+reducing redundancy, so when we update a value we can update it once
+1nf - atomic values (no lists) and contains pkey
+2nf - primary key is a single column
+3nf - all values are directly related to primary key
+
+pkey - unique identifiers for rows in table
+fkey - referencing pkey in a different table
+
+ACID - something to do with transactions
+ACID has to do with integrity of data and transactions
+transactions are atomic, consistent, isolated, and (the database is) durable
+
+*/
+select * from FoodType ft;
+select * from Grocery g;
+select * from Supermarket s;
+select * from Availability;
+
+--let's get the average price by food type
+select FoodType, avgprice from
+FoodType
+inner join (
+select FoodType, avg(price) as avgprice FROM
+grocery inner join Availability on Grocery.GroceryID = Availability.GroceryID group by FoodType ) n on n.FoodType = FoodType.FoodTypeID;
+
+/*
+ * set operations are operations on like result-sets (with the same columns)
+ * eg: i want the avalabilities of only 2 different supermarkets
+ */
+select * from Availability where SupermarketID = 1
+UNION
+select * from Availability where SupermarketID = 3;
+
+select max(price) from Availability a;
+select GroceryID, max(price) from Availability group by GroceryID;
+--having is like where for aggregates
+--return number of offering of a grocery where the max price is > 2 (how common are expensive groceries?)
+select GroceryID, count(price) from Availability group by GroceryID having max(price) > 2;
+
+--multiplicity has to do with pkey/fkey relationships
+--one-many and many-many, one-one
+--many-to-many relationships must be mediated by an intermediary table (the actor-movie relationships can have a 'role' table in between)
+--one to one.. you just have a row that is connected to a single other row.. both have fkey to each other
+
+--docker is a containerization tool that allows us to set up containers (like virtual machines) using images (blueprint of container)
+--the advantage is a completely standardized environment that can be transported across the internet
+
+--views are a way for us to save a query (views vs materialized views)
+
+
