@@ -10,6 +10,9 @@ public class FoodTypeService {
     public FoodTypeService(){
         repository = new FoodBank();
     }
+    public FoodTypeService(FoodBank repository){
+        this.repository = repository;
+    }
     public void createFoodType(FoodType f){
         if(!repository.checkIfFoodTypeExistsByName(f.getFoodTypeName())) {
             repository.createFoodType(f);
